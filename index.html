@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111318">
+<link rel="manifest" href="manifest.json">
+<title>LIFE RISE</title>
+<style>
+:root{--bg:#090b10;--panel:#131720;--panel2:#1a1f2a;--text:#f4f6f8;--muted:#9da5b1;--gold:#ffc62e;--green:#45d36b;--red:#ff5f5f;--blue:#4d9cff}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#080a0e,#11151d);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+button,input{font:inherit} button{border:0;cursor:pointer}
+.app{max-width:520px;margin:auto;min-height:100vh;background:#0d1016;position:relative;overflow:hidden}
+header{padding:18px 18px 12px;position:sticky;top:0;background:rgba(13,16,22,.96);backdrop-filter:blur(12px);z-index:5;border-bottom:1px solid #242a35}
+.logo{font-size:28px;font-weight:900;letter-spacing:2px}.logo span{color:var(--gold)} .sub{color:var(--muted);font-size:12px;margin-top:2px}
+main{padding:16px 16px 90px}.card{background:var(--panel);border:1px solid #252b36;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 10px 30px #0003}
+.hero{background:linear-gradient(135deg,#202833,#12161e);min-height:150px;display:flex;align-items:flex-end;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 75% 25%,#ffc62e22,transparent 45%)}.hero h1{margin:0;font-size:24px;position:relative;z-index:1}.hero p{margin:5px 0 0;color:#cbd0d8;position:relative;z-index:1}
+.money{font-size:30px;font-weight:900;color:var(--green)} .row{display:flex;justify-content:space-between;gap:10px;align-items:center}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{background:var(--panel2);padding:12px;border-radius:14px}.stat b{display:block;font-size:19px}.stat small{color:var(--muted)}
+h2{font-size:17px;margin:6px 0 12px}.muted{color:var(--muted)} .gold{color:var(--gold)} .green{color:var(--green)}
+.btn{width:100%;padding:13px 15px;border-radius:12px;background:var(--gold);color:#17120a;font-weight:800;margin-top:10px}.btn.secondary{background:#29303c;color:white}.btn.green{background:var(--green);color:#07110a}.btn.red{background:var(--red);color:#1b0707}
+.job{display:flex;gap:12px;align-items:center}.icon{width:46px;height:46px;border-radius:13px;background:#252c38;display:grid;place-items:center;font-size:23px}.job h3{margin:0 0 3px;font-size:15px}.job p{margin:0;color:var(--muted);font-size:12px}
+.progress{height:8px;background:#292f39;border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;background:var(--gold);width:12%}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);display:flex;background:#11151d;border-top:1px solid #292f39;z-index:8}.nav button{flex:1;background:transparent;color:var(--muted);padding:11px 4px 9px;font-size:11px}.nav button.active{color:var(--gold)}.nav .ni{display:block;font-size:20px;margin-bottom:2px}
+.screen{display:none}.screen.active{display:block}
+input{width:100%;padding:13px;border-radius:12px;border:1px solid #303745;background:#0d1118;color:white;outline:none;margin:7px 0}.otp{letter-spacing:5px;text-align:center}
+.login{min-height:100vh;display:flex;align-items:center;padding:24px;background:radial-gradient(circle at 50% 0,#2a2617,#0a0c10 48%)} .loginbox{width:100%}.brand{font-size:42px;font-weight:1000;letter-spacing:3px}.brand span{color:var(--gold)}.tag{color:#aeb6c2;margin:0 0 24px}.notice{background:#1c2118;border:1px solid #3c4c2c;color:#cfe8b9;border-radius:12px;padding:10px;font-size:12px;margin-top:10px}
+.toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%) translateY(20px);background:#fff;color:#111;padding:11px 16px;border-radius:12px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:20}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal{position:fixed;inset:0;background:#0009;display:none;align-items:flex-end;z-index:15}.modal.open{display:flex}.sheet{background:#141922;width:100%;max-width:520px;margin:auto 0 0;border-radius:24px 24px 0 0;padding:20px;border-top:1px solid #313846}.close{float:right;background:#2a303b;color:white;border-radius:50%;width:34px;height:34px}
+.choice{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}.choice button{padding:14px;border-radius:14px;background:#222936;color:white;border:1px solid #303746}.choice button:hover{border-color:var(--gold)}
+.small{font-size:12px;color:var(--muted)} .pill{display:inline-block;background:#222a36;border-radius:99px;padding:5px 9px;font-size:11px;margin-right:4px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+const KEY="lifeRiseV01";
+let state=JSON.parse(localStorage.getItem(KEY)||"null");
+let current="home";
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function toast(t){let x=document.getElementById("toast");x.textContent=t;x.classList.add("show");setTimeout(()=>x.classList.remove("show"),1800)}
+function money(n){return "₹"+Math.max(0,n).toLocaleString("en-IN")}
+function render(){
+ if(!state){renderLogin();return}
+ document.getElementById("root").innerHTML=`
+ <div class="app">
+ <header><div class="logo">LIFE <span>RISE</span></div><div class="sub">Navapur • East District</div></header>
+ <main>
+  <section id="home" class="screen ${current==="home"?"active":""}">${home()}</section>
+  <section id="jobs" class="screen ${current==="jobs"?"active":""}">${jobs()}</section>
+  <section id="world" class="screen ${current==="world"?"active":""}">${world()}</section>
+  <section id="phone" class="screen ${current==="phone"?"active":""}">${phone()}</section>
+  <section id="profile" class="screen ${current==="profile"?"active":""}">${profile()}</section>
+ </main>
+ <nav class="nav">
+  ${nav("home","🏠","Home")}${nav("jobs","💼","Jobs")}${nav("world","🗺️","World")}${nav("phone","📱","Phone")}${nav("profile","👤","Me")}
+ </nav>
+ </div>`;
+}
+function nav(id,ico,label){return `<button class="${current===id?"active":""}" onclick="current='${id}';render()"><span class="ni">${ico}</span>${label}</button>`}
+function home(){
+ return `<div class="card hero"><div><h1>Welcome, ${state.name} 👋</h1><p>Start small. Build a life. Build an empire.</p></div></div>
+ <div class="card"><div class="row"><div><div class="small">CASH + BANK</div><div class="money">${money(state.cash)}</div></div><span class="pill">${state.level}</span></div>
+ <div class="small" style="margin:10px 0 6px">Progress to next level</div><div class="progress"><i style="width:${Math.min(100,state.xp/10)}%"></i></div></div>
+ <div class="grid">
+ <div class="stat"><small>🏠 Home</small><b>Room</b><span class="small">Rent ${money(3000)}/mo</span></div>
+ <div class="stat"><small>🏍️ Vehicle</small><b>${state.vehicle}</b><span class="small">${state.vehicle==="On Foot"?"Save for a bike":"Owned"}</span></div>
+ </div>
+ <div class="card"><h2>Quick Start</h2>
+ <div class="job"><div class="icon">🛵</div><div><h3>QuickBite Delivery</h3><p>Complete a delivery and earn ₹180–₹300.</p></div></div>
+ <button class="btn green" onclick="startDelivery()">ACCEPT DELIVERY</button></div>
+ <div class="card"><h2>Your journey</h2><div class="row"><span>Struggling</span><span class="muted">→</span><span>Worker</span><span class="muted">→</span><span>Business</span><span class="muted">→</span><span>Billionaire</span></div></div>`;
+}
+function jobs(){
+ return `<h2>Jobs & Income</h2>
+ <div class="card"><div class="job"><div class="icon">🛵</div><div><h3>QuickBite Delivery</h3><p>Risk: Low • Earnings: ₹180–₹300</p></div></div><button class="btn green" onclick="startDelivery()">START JOB</button></div>
+ <div class="card"><div class="job"><div class="icon">🚕</div><div><h3>Taxi Driver</h3><p>Unlock after buying a vehicle.</p></div></div><button class="btn secondary" onclick="buyBike()">BUY USED BIKE — ₹10,000</button></div>
+ <div class="card"><div class="job"><div class="icon">🔧</div><div><h3>Mechanic Assistant</h3><p>Unlock at Worker level.</p></div></div><button class="btn secondary" onclick="toast('Reach Worker level to unlock')">LOCKED</button></div>`;
+}
+function world(){
+ return `<h2>Navapur — East District</h2>
+ <div class="card" style="min-height:250px;background:linear-gradient(145deg,#1c2930,#182019);display:flex;align-items:center;justify-content:center;text-align:center">
+ <div><div style="font-size:65px">🏙️</div><h2>Open World Prototype</h2><p class="muted">Explore the district, find work and meet people.</p><div class="choice">
+ <button onclick="toast('Bank: account balance '+money(state.cash))">🏦 Bank</button>
+ <button onclick="toast('Restaurant: delivery orders available')">🍛 Restaurant</button>
+ <button onclick="buyBike()">🏍️ Bike Dealer</button>
+ <button onclick="toast('Salon: business coming soon')">💇 Salon</button>
+ </div></div></div>
+ <div class="card"><h2>First goal</h2><p class="muted">Save ₹10,000 for your first motorcycle. Once you own it, more jobs unlock.</p><div class="progress"><i style="width:${Math.min(100,state.cash/100)}%"></i></div></div>`;
+}
+function phone(){
+ return `<h2>Phone</h2><div class="card"><div class="row"><div><b>${state.phone}</b><div class="small">Registered mobile</div></div><span>📶</span></div></div>
+ <div class="grid"><button class="card" onclick="toast('Messages: No new messages')">💬 Messages</button><button class="card" onclick="toast('Bank balance: '+money(state.cash))">🏦 Bank</button><button class="card" onclick="current='jobs';render()">💼 Jobs</button><button class="card" onclick="toast('Contacts coming soon')">👥 Contacts</button></div>`;
+}
+function profile(){
+ return `<h2>My Life</h2><div class="card"><div class="row"><div><h2 style="margin:0">${state.name}</h2><div class="small">Age ${state.age} • ${state.level}</div></div><div style="font-size:45px">🧑</div></div></div>
+ <div class="grid"><div class="stat"><small>💰 Wealth</small><b>${money(state.cash)}</b></div><div class="stat"><small>⭐ XP</small><b>${state.xp}</b></div><div class="stat"><small>❤️ Relationship</small><b>${state.relationship}/100</b></div><div class="stat"><small>🏢 Businesses</small><b>${state.businesses}</b></div></div>
+ <div class="card"><h2>Future businesses</h2><p class="muted">Salon • Restaurant • Taxi company • Manufacturing • Real estate</p><button class="btn" onclick="toast('Business system is next in V0.2')">VIEW EMPIRE PLAN</button></div>
+ <button class="btn red" onclick="logout()">LOG OUT</button>`;
+}
+function renderLogin(){
+ document.getElementById("root").innerHTML=`<div class="app"><div class="login"><div class="loginbox">
+ <div class="brand">LIFE <span>RISE</span></div><p class="tag">Build your life. Build your empire.</p>
+ <div class="card"><h2>Mobile Registration</h2><p class="small">Prototype registration. No real SMS is sent.</p>
+ <input id="name" placeholder="Your name" maxlength="24"><input id="phone" placeholder="+91 Mobile Number" inputmode="tel" maxlength="14">
+ <button class="btn" onclick="sendOtp()">SEND OTP</button><div id="otpArea"></div>
+ <div class="notice">Demo OTP: <b>123456</b>. This prototype stores your game profile only on this device.</div></div>
+ </div></div></div>`;
+}
+function sendOtp(){
+ let name=document.getElementById("name").value.trim(), phone=document.getElementById("phone").value.trim();
+ if(name.length<2||phone.replace(/\D/g,"").length<10){toast("Enter your name and 10-digit mobile number");return}
+ document.getElementById("otpArea").innerHTML=`<input id="otp" class="otp" placeholder="Enter OTP" inputmode="numeric" maxlength="6"><button class="btn green" onclick="register()">VERIFY & START GAME</button>`;
+ toast("Demo OTP sent: 123456");
+}
+function register(){
+ if(document.getElementById("otp").value!=="123456"){toast("Use demo OTP 123456");return}
+ state={name:document.getElementById("name").value.trim(),phone:document.getElementById("phone").value.trim(),age:23,cash:2000,xp:0,level:"Struggling",vehicle:"On Foot",relationship:0,businesses:0};
+ save();render();toast("Welcome to Navapur!");
+}
+function startDelivery(){
+ let earn=Math.floor(180+Math.random()*121); state.cash+=earn; state.xp+=25; state.level=state.xp>=100?"Worker":"Struggling"; save();render();toast("Delivery complete! +"+money(earn));
+}
+function buyBike(){
+ if(state.vehicle!=="On Foot"){toast("You already own a vehicle");return}
+ if(state.cash<10000){toast("You need "+money(10000-state.cash)+" more");return}
+ state.cash-=10000;state.vehicle="Used Bike";state.xp+=50;state.level="Worker";save();render();toast("Bike purchased!");
+}
+function logout(){localStorage.removeItem(KEY);state=null;render()}
+render();
+</script>
+</body></html>
